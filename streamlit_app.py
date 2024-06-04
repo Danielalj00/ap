@@ -1,42 +1,36 @@
 import streamlit as st
-from transformers import MarianMTModel, MarianTokenizer
-import os
-from dotenv import load_dotenv
+from googletrans import Translator
 
-# Cargar las variables de entorno desde el archivo .env
-load_dotenv()
+st.title('Traducción Automática Multilingüe')
+
+# Crear el traductor
+translator = Translator()
 
 # Diccionario de modelos para traducción
 model_dict = {
-    "Español a Inglés": "Helsinki-NLP/opus-mt-es-en",
-    "Inglés a Español": "Helsinki-NLP/opus-mt-en-es",
-    "Francés a Inglés": "Helsinki-NLP/opus-mt-fr-en",
-    "Inglés a Francés": "Helsinki-NLP/opus-mt-en-fr",
-    "Alemán a Inglés": "Helsinki-NLP/opus-mt-de-en",
-    "Inglés a Alemán": "Helsinki-NLP/opus-mt-en-de",
+    "Español a Inglés": ("es", "en"),
+    "Inglés a Español": ("en", "es"),
+    "Francés a Inglés": ("fr", "en"),
+    "Inglés a Francés": ("en", "fr"),
+    "Alemán a Inglés": ("de", "en"),
+    "Inglés a Alemán": ("en", "de"),
 }
 
-st.title('Traducción Automática Multilingüe')
 st.header('Seleccione el idioma de origen y destino')
-
-# Selección de idioma
 option = st.selectbox('Selecciona la dirección de traducción', list(model_dict.keys()))
 
-# Cargar el modelo y tokenizer seleccionados
-model_name = model_dict[option]
-tokenizer = MarianTokenizer.from_pretrained(model_name)
-model = MarianMTModel.from_pretrained(model_name)
+# Obtener los códigos de idioma
+src_lang, dest_lang = model_dict[option]
 
 # Entrada de texto del usuario
-user_input = st.text_area(f'Texto a traducir ({option.split()[0]})')
+user_input = st.text_area(f'Texto a traducir ({src_lang} a {dest_lang})')
 
 if st.button('Traducir'):
     if user_input:
-        # Tokenizar y traducir el texto
-        inputs = tokenizer.encode(user_input, return_tensors="pt", max_length=512, truncation=True)
-        translated_ids = model.generate(inputs, max_length=512, num_beams=4, early_stopping=True)
-        translated_text = tokenizer.decode(translated_ids[0], skip_special_tokens=True)
-        
+        # Realizar la traducción
+        translated = translator.translate(user_input, src=src_lang, dest=dest_lang)
+        translated_text = translated.text
+
         # Mostrar el texto traducido
         st.write('**Texto Traducido:**')
         st.write(translated_text)
