@@ -1,5 +1,10 @@
 import streamlit as st
 from transformers import MarianMTModel, MarianTokenizer
+import os
+from dotenv import load_dotenv
+
+# Cargar las variables de entorno desde el archivo .env
+load_dotenv()
 
 # Diccionario de modelos para traducción
 model_dict = {
